@@ -1,7 +1,10 @@
 from typing import Union, Tuple
-import os, torch
+import os
+from glob import glob
+import torch
 from torchvision.transforms import functional as FT
 import numpy as np
+import pandas as pd
 import PIL
 from PIL import Image
 
@@ -192,11 +195,6 @@ def resize_and_pad_images(dataset_path : str='.', new_height : int=128, new_widt
     except ValueError as val_err:
         print(val_err)
 
-import os
-from glob import glob
-import pandas as pd
-from PIL import Image
-
 def get_dataset_statistics(path : str = './', \
                            save_plk : bool = False, \
                            name_plk :str = 'dataset_stat') -> pd.DataFrame:
@@ -247,7 +245,7 @@ def get_dataset_statistics(path : str = './', \
         'image_width':image_width,
         'image_height':image_height
     })
-    df.describe()
+    print(df.describe())
     if save_plk:
         df.to_pickle(name_plk)
     return df

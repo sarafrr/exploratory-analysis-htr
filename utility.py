@@ -191,3 +191,63 @@ def resize_and_pad_images(dataset_path : str='.', new_height : int=128, new_widt
                 f'\nwith width bigger than {new_width}: {(count_img_out_width/len(nameimgs))*100}')
     except ValueError as val_err:
         print(val_err)
+
+import os
+from glob import glob
+import pandas as pd
+from PIL import Image
+
+def get_dataset_statistics(path : str = './', \
+                           save_plk : bool = False, \
+                           name_plk :str = 'dataset_stat') -> pd.DataFrame:
+    '''
+    Computes the statistics over a dataset that is contained in a folder.
+    The dataset has to be composed of both the images (which can be either .png
+    or .jpg) of lines of text and the textual files 
+    with the transcription. It is possible to save the pd.DataFrame
+    as a plk file.
+
+    Args
+    ----
+    :parameter str path: the path to the folder containing the images of lines 
+        and the textual files
+    :parameter bool save_plk: if to save the plk file with the dataset information
+    :parameter str name_plk: the name we want to give to the pd.DataFrame
+    :returns pd.DataFrame: a dataframe containing information on the images and 
+        textual files
+    :raises an error if there are not textual files
+    '''
+    
+    file_list = glob(os.path.join(path,'*.txt'))
+    n_files = len(file_list)
+    print(n_files)
+    assert n_files != 0, print('There are not files in ' + path)
+
+    text, line_length, image_width, image_height = [], [], [], []
+    for file in file_list:
+        with open(file, 'r') as f:
+            t = f.read()
+            l = len(t)
+
+        path_to_img = os.path.splitext(file)[0]+'.png'
+        try:
+            image = Image.open(path_to_img)
+        except IOError as io_err:
+            print(io_err)
+            path_to_img = os.path.splitext(file)[0]+'.jpg'
+            image = Image.open(path_to_img)
+        text.append(t)
+        line_length.append(l)
+        image_width.append(image.width)
+        image_height.append(image.height)
+    
+    df = pd.DataFrame({
+        'text':text,
+        'line_length':line_length,
+        'image_width':image_width,
+        'image_height':image_height
+    })
+    df.describe()
+    if save_plk:
+        df.to_pickle(name_plk)
+    return df

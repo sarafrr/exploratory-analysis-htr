@@ -247,5 +247,5 @@ def get_dataset_statistics(path : str = './', \
     })
     print(df.describe())
     if save_plk:
-        df.to_pickle(name_plk)
+        df.to_pickle(name_plk+'.plk')
     return df
